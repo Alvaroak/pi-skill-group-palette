@@ -66,19 +66,47 @@ const UNGROUPED = "(ungrouped)";
 // everything else on the shelf off, so newly added groups start disabled until
 // explicitly enabled. /reload does NOT reset, so toggles made mid-session
 // survive a hot reload.
-const DEFAULT_ENABLED_GROUPS = ["alvaroak", "misc"];
+//
+// Configured via ~/.pi/agent/pi-skill-groups.json ("defaultEnabled": [...],
+// "pinned": [...]). Unconfigured: every discovered group starts enabled.
+function loadGroupConfig(): { defaultEnabled: string[]; pinned: string[] } {
+	try {
+		const raw = JSON.parse(fs.readFileSync(path.join(os.homedir(), ".pi/agent/pi-skill-groups.json"), "utf-8")) as {
+			defaultEnabled?: string[];
+			pinned?: string[];
+		};
+		return {
+			defaultEnabled: Array.isArray(raw.defaultEnabled) ? raw.defaultEnabled : [],
+			pinned: Array.isArray(raw.pinned) ? raw.pinned : [],
+		};
+	} catch {
+		return { defaultEnabled: [], pinned: [] };
+	}
+}
+
+let GROUP_CONFIG: { defaultEnabled: string[]; pinned: string[] } | null = null;
+function groupConfig() {
+	if (!GROUP_CONFIG) GROUP_CONFIG = loadGroupConfig();
+	return GROUP_CONFIG;
+}
+
+function defaultEnabledGroups(): string[] {
+	return groupConfig().defaultEnabled;
+}
 
 /** Groups that should be off at session start: everything but the defaults. */
 function defaultDisabledGroups(): Set<string> {
 	const off = new Set<string>();
 	for (const dir of listGroupDirs()) {
 		const name = path.basename(dir);
-		if (!DEFAULT_ENABLED_GROUPS.includes(name)) off.add(name);
+		if (!defaultEnabledGroups().includes(name)) off.add(name);
 	}
 	return off;
 }
 // Tab-bar order: pinned groups first (in this order), everything else alphabetical.
-const PINNED_GROUP_ORDER = ["alvaroak", "misc"];
+function pinnedGroupOrder(): string[] {
+	return groupConfig().pinned;
+}
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Persisted state: which groups and skills are disabled
@@ -401,8 +429,9 @@ function groupSkills(skills: SkillInfo[]): Map<string, SkillInfo[]> {
 		list.sort((a, b) => rank(a) - rank(b) || a.name.localeCompare(b.name));
 	}
 	const rank = (name: string) => {
-		const index = PINNED_GROUP_ORDER.indexOf(name);
-		return index === -1 ? PINNED_GROUP_ORDER.length : index;
+		const order = pinnedGroupOrder();
+		const index = order.indexOf(name);
+		return index === -1 ? order.length : index;
 	};
 	const sorted = [...groups.entries()].sort(([a], [b]) => rank(a) - rank(b) || a.localeCompare(b));
 	// The fallback bucket reads best at the end of the tab bar.

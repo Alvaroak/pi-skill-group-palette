@@ -34,6 +34,20 @@ In the overlay:
 
 Group toggles last for the session; per-skill toggles persist across sessions. Skills whose `SKILL.md` frontmatter declares `always-on: true` show with a ↻ marker — always active regardless of toggles.
 
+## Configuration
+
+Optional config at `~/.pi/agent/pi-skill-groups.json`:
+
+```json
+{
+  "defaultEnabled": ["misc", "my-group"],
+  "pinned": ["my-group", "misc"]
+}
+```
+
+- `defaultEnabled` — groups on at session start (everything else starts off). Unset: **every** discovered group starts enabled.
+- `pinned` — groups pinned to the front of the palette's tab bar, in order. Unset: alphabetical.
+
 ## License
 
 MIT
