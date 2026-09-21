@@ -1,0 +1,26 @@
+{
+  "name": "@alvaroak/pi-skill-group-palette",
+  "version": "0.1.0",
+  "description": "Grouped skill palette and lazy skill-group discovery for the Pi coding agent",
+  "license": "MIT",
+  "keywords": [
+    "pi-package",
+    "pi-extension",
+    "skills",
+    "palette"
+  ],
+  "files": [
+    "skill-group-palette.ts",
+    "README.md",
+    "LICENSE"
+  ],
+  "peerDependencies": {
+    "@earendil-works/pi-coding-agent": "*",
+    "@earendil-works/pi-tui": "*"
+  },
+  "pi": {
+    "extensions": [
+      "./skill-group-palette.ts"
+    ]
+  }
+}
