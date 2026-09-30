@@ -9,7 +9,7 @@ Skills live on a "shelf" (`~/skills-shelf`) organised into group folders. Pi doe
 ## Install
 
 ```bash
-pi install git:github.com/Alvaroak/pi-skill-group-palette@v0.1.0
+pi install git:github.com/Alvaroak/pi-skill-group-palette@v0.1.2
 ```
 
 ## Usage
