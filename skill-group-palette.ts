@@ -397,16 +397,28 @@ function scanShelfSkills(): SkillInfo[] {
 	return skills;
 }
 
+/** Resolve a skill directory so symlinked mirrors compare to their shelf source. */
+function canonicalSkillDir(baseDir: string): string {
+	try {
+		return fs.realpathSync(baseDir);
+	} catch {
+		return baseDir;
+	}
+}
+
 /**
  * Skills for the palette/command: the full shelf scan (so disabled groups still
  * appear and can be re-enabled), overlaid with pi's live-loaded skills for
  * anything outside the shelf (project skills, --skill paths, other roots).
+ * Shelf mirrors are excluded so their shelf-derived group is retained, while a
+ * same-named skill from another root preserves the existing overlay behavior.
  */
 function getAllSkills(ctx: ExtensionCommandContext): SkillInfo[] {
-	const byName = new Map<string, SkillInfo>();
-	for (const skill of scanShelfSkills()) byName.set(skill.name, skill);
+	const shelfSkills = scanShelfSkills();
+	const shelfSkillDirs = new Set(shelfSkills.map((skill) => canonicalSkillDir(skill.baseDir)));
+	const byName = new Map(shelfSkills.map((skill) => [skill.name, skill]));
 	for (const skill of getLoadedSkills(ctx)) {
-		if (!skill.baseDir.startsWith(SHELF_ROOT)) byName.set(skill.name, skill);
+		if (!shelfSkillDirs.has(canonicalSkillDir(skill.baseDir))) byName.set(skill.name, skill);
 	}
 	const all = [...byName.values()];
 	lastLoadedSkills = all;

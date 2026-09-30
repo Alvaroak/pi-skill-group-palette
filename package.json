@@ -1,6 +1,6 @@
 {
   "name": "@alvaroak/pi-skill-group-palette",
-  "version": "0.1.0",
+  "version": "0.1.2",
   "description": "Grouped skill palette and lazy skill-group discovery for the Pi coding agent",
   "license": "MIT",
   "keywords": [
